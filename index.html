@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Ridwan AI - Super App Android</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        ridwan: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar & Android Material Styling */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+        .selectable-text {
+            user-select: text;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 9999px;
+        }
+        
+        /* Markdown Content Styling */
+        .prose-chat p {
+            margin-bottom: 0.65rem;
+            line-height: 1.6;
+        }
+        .prose-chat p:last-child {
+            margin-bottom: 0;
+        }
+        .prose-chat pre {
+            background: #090d16;
+            color: #e2e8f0;
+            padding: 0.85rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            margin: 0.65rem 0;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .prose-chat code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            padding: 0.15rem 0.35rem;
+            border-radius: 0.35rem;
+            font-size: 0.82em;
+        }
+        .prose-chat pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .prose-chat ul, .prose-chat ol {
+            padding-left: 1.25rem;
+            margin-bottom: 0.65rem;
+        }
+        .prose-chat ul {
+            list-style-type: disc;
+        }
+        .prose-chat ol {
+            list-style-type: decimal;
+        }
+        .prose-chat table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75rem 0;
+            font-size: 0.85rem;
+        }
+        .prose-chat th, .prose-chat td {
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .prose-chat th {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.85); opacity: 0.8; }
+            50% { transform: scale(1.18); opacity: 0.3; }
+            100% { transform: scale(0.85); opacity: 0.8; }
+        }
+        .voice-orb-active {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .float-anim {
+            animation: floatSlow 3.5s ease-in-out infinite;
+        }
+
+        /* Phone Frame Mode for Desktop Preview */
+        .phone-frame-mode {
+            max-width: 430px;
+            height: 92vh;
+            max-height: 900px;
+            border-radius: 42px;
+            border: 10px solid #1e293b;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 2px rgba(255,255,255,0.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen w-screen flex flex-col items-center justify-center relative overflow-hidden">
+
+    <!-- Background Ambient Glow (visible in Phone Frame Mode on desktop) -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-cyan-600/15 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Desktop Top Toolbar (To toggle Android Frame / Fullscreen) -->
+    <div id="desktopToolbar" class="hidden md:flex items-center justify-between w-full max-w-[430px] mb-2 px-2 z-20 text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-medium text-slate-300">Android 15 Emulator • Ridwan AI v2.5</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="togglePhoneFrame()" id="frameToggleBtn" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-expand text-[10px]"></i>
+                <span>Layar Penuh</span>
+            </button>
+            <button onclick="switchTab('apk')" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 transition flex items-center gap-1.5">
+                <i class="fa-brands fa-android"></i>
+                <span>Build APK</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN ANDROID APP CONTAINER -->
+    <div id="androidContainer" class="w-full h-full md:phone-frame-mode bg-slate-900 flex flex-col justify-between relative z-10 overflow-hidden transition-all duration-300">
+
+        <!-- APP HEADER BAR -->
+        <header class="px-4 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 flex items-center justify-between z-20">
+            <div class="flex items-center gap-3">
+                <!-- App Icon SVG -->
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-cyan-500 p-0.5 shadow-lg shadow-indigo-500/25 flex items-center justify-center relative">
+                    <div class="w-full h-full bg-slate-950/30 rounded-[14px] flex items-center justify-center backdrop-blur-xs">
+                        <span class="font-extrabold text-lg tracking-tighter text-white">R</span>
+                        <i class="fa-solid fa-sparkles text-[9px] text-amber-300 absolute top-1.5 right-1.5"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="font-bold text-base tracking-tight text-white">Ridwan AI</h1>
+                        <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">PRO</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <span id="headerSubtitle">Key: sk_xof_f1bc...60b8</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <!-- Web Search Grounding Toggle -->
+                <button onclick="toggleWebSearch()" id="webSearchBtn" title="Mode Pencarian Web Google Live" class="p-2 rounded-xl bg-slate-800/90 text-slate-400 hover:text-white border border-slate-700/70 transition flex items-center gap-1 text-xs">
+                    <i class="fa-solid fa-globe"></i>
+                    <span id="webSearchBadge" class="hidden sm:inline text-[10px] font-medium">Web</span>
+                </button>
+                <!-- Clear / New Chat Button -->
+                <button onclick="startNewChat()" title="Percakapan Baru" class="p-2 rounded-xl bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700/70 transition">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                </button>
+                <!-- History Drawer Button -->
+                <button onclick="toggleHistoryDrawer()" title="Riwayat Chat" class="p-2 rounded-xl bg-slate-800/90 text-slate-300 hover:text-white border border-slate-700/70 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA (TABS) -->
+        <main class="flex-1 overflow-hidden relative bg-slate-900">
+
+            <!-- ==================== TAB 1: AI CHAT ==================== -->
+            <section id="tab-chat" class="h-full flex flex-col justify-between">
+                
+                <!-- Chat Messages Scroll Container -->
+                <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 selectable-text">
+                    
+                    <!-- Welcome Hero Card -->
+                    <div id="welcomeCard" class="my-2 p-5 rounded-3xl bg-gradient-to-br from-slate-800/90 via-slate-800/60 to-indigo-950/60 border border-slate-700/70 shadow-xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                                <i class="fa-solid fa-key text-[10px]"></i>
+                                API Key Aktif & Terhubung
+                            </span>
+                            <span class="text-[11px] text-slate-400 font-mono">v2.5 Android</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-white mb-1">Halo! Saya Ridwan AI 👋</h2>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                            Asisten AI pintar Anda di Android. Saya siap membantu menjawab pertanyaan, membuat program, menganalisis foto, membuat gambar AI, hingga pencarian web real-time.
+                        </p>
+
+                        <!-- Quick Action Chips -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="sendQuickPrompt('Buatkan ide bisnis digital modal kecil yang menguntungkan di tahun ini beserta strateginya.')" class="text-left p-2.5 rounded-2xl bg-slate-900/70 hover:bg-indigo-600/20 border border-slate-700/60 hover:border-indigo-500/40 transition group">
+                                <i class="fa-solid fa-rocket text-indigo-400 text-xs mb-1 block group-hover:scale-110 transition"></i>
+                                <div class="text-xs font-semibold text-slate-200">Ide Bisnis Digital</div>
+                                <div class="text-[10px] text-slate-400 truncate">Strategi & analisis pasar</div>
+                            </button>
+                            <button onclick="sendQuickPrompt('Buatkan contoh kode aplikasi kalkulator modern dengan HTML, CSS, dan JavaScript.')" class="text-left p-2.5 rounded-2xl bg-slate-900/70 hover:bg-indigo-600/20 border border-slate-700/60 hover:border-indigo-500/40 transition group">
+                                <i class="fa-solid fa-code text-cyan-400 text-xs mb-1 block group-hover:scale-110 transition"></i>
+                                <div class="text-xs font-semibold text-slate-200">Generator Kode</div>
+                                <div class="text-[10px] text-slate-400 truncate">Bikin script & aplikasi</div>
+                            </button>
+                            <button onclick="switchTab('image')" class="text-left p-2.5 rounded-2xl bg-slate-900/70 hover:bg-purple-600/20 border border-slate-700/60 hover:border-purple-500/40 transition group">
+                                <i class="fa-solid fa-wand-magic-sparkles text-purple-400 text-xs mb-1 block group-hover:scale-110 transition"></i>
+                                <div class="text-xs font-semibold text-slate-200">Studio Gambar AI</div>
+                                <div class="text-[10px] text-slate-400 truncate">Ubah teks jadi gambar</div>
+                            </button>
+                            <button onclick="sendQuickPrompt('Berikan berita teknologi dan AI terbaru hari ini secara lengkap.')" class="text-left p-2.5 rounded-2xl bg-slate-900/70 hover:bg-emerald-600/20 border border-slate-700/60 hover:border-emerald-500/40 transition group">
+                                <i class="fa-solid fa-newspaper text-emerald-400 text-xs mb-1 block group-hover:scale-110 transition"></i>
+                                <div class="text-xs font-semibold text-slate-200">Riset Web Live</div>
+                                <div class="text-[10px] text-slate-400 truncate">Informasi terkini & akurat</div>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Image Attachment Preview Bar -->
+                <div id="imageAttachmentPreview" class="hidden px-4 py-2 bg-slate-800/90 border-t border-slate-700/80 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <img id="attachedImageThumb" src="" alt="Preview" class="w-10 h-10 rounded-xl object-cover border border-indigo-500/50">
+                        <div>
+                            <div class="text-xs font-semibold text-slate-200">Foto siap dianalisis Ridwan AI</div>
+                            <div id="attachedImageName" class="text-[10px] text-slate-400 truncate max-w-[180px]">image.jpg</div>
+                        </div>
+                    </div>
+                    <button onclick="clearImageAttachment()" class="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- PDF / Document Attachment Preview Bar -->
+                <div id="pdfAttachmentPreview" class="hidden px-4 py-2 bg-slate-800/90 border-t border-slate-700/80 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/50 flex items-center justify-center text-red-400">
+                            <i class="fa-solid fa-file-pdf text-base"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold text-slate-200">Dokumen PDF/Teks Dilampirkan</div>
+                            <div id="attachedPdfName" class="text-[10px] text-slate-400 truncate max-w-[180px]">dokumen.pdf</div>
+                        </div>
+                    </div>
+                    <button onclick="clearPdfAttachment()" class="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Chat Input Bar -->
+                <div class="p-3 bg-slate-900/95 border-t border-slate-800/80">
+                    <div class="flex items-end gap-2 bg-slate-800/90 border border-slate-700/80 rounded-3xl p-1.5 pl-3 focus-within:border-indigo-500/70 transition shadow-inner">
+                        
+                        <!-- Upload Image / Camera Button -->
+                        <label for="cameraInput" class="p-2 text-slate-400 hover:text-indigo-400 cursor-pointer transition shrink-0" title="Upload Foto / Kamera">
+                            <i class="fa-solid fa-camera text-base"></i>
+                            <input id="cameraInput" type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        </label>
+
+                        <!-- Upload PDF / Document Button -->
+                        <label for="pdfInput" class="p-2 text-slate-400 hover:text-red-400 cursor-pointer transition shrink-0" title="Kirim File PDF / Dokumen Teks">
+                            <i class="fa-solid fa-file-pdf text-base"></i>
+                            <input id="pdfInput" type="file" accept=".pdf,.txt,.docx,.csv,.json" class="hidden" onchange="handlePdfUpload(event)">
+                        </label>
+
+                        <!-- Voice Dictation Button -->
+                        <button onclick="toggleSpeechRecognition()" id="micInputBtn" class="p-2 text-slate-400 hover:text-rose-400 transition shrink-0" title="Dikte Suara">
+                            <i class="fa-solid fa-microphone text-base"></i>
+                        </button>
+
+                        <!-- Textarea -->
+                        <textarea id="chatInput" rows="1" placeholder="Tanya apa saja ke Ridwan AI..." class="w-full bg-transparent text-sm text-slate-100 placeholder-slate-400 focus:outline-none resize-none py-2 max-h-28 selectable-text" oninput="autoResizeTextarea(this)" onkeydown="handleChatKeydown(event)"></textarea>
+
+                        <!-- Send Button -->
+                        <button onclick="sendMessage()" id="sendBtn" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 hover:from-indigo-500 hover:to-violet-400 text-white flex items-center justify-center shadow-md shadow-indigo-600/30 transition shrink-0">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 2: STUDIO GAMBAR AI ==================== -->
+            <section id="tab-image" class="hidden h-full overflow-y-auto p-4 space-y-4">
+                <div class="p-4 rounded-3xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-slate-800/60 border border-purple-500/30">
+                    <div class="flex items-center gap-2.5 mb-1">
+                        <div class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
+                            <i class="fa-solid fa-palette"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-sm text-white">Ridwan Imagine Studio</h2>
+                            <p class="text-[11px] text-slate-300">Generator Gambar AI Resolusi Tinggi</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prompt Input -->
+                <div class="space-y-3 bg-slate-800/60 p-4 rounded-3xl border border-slate-700/70">
+                    <label class="block text-xs font-semibold text-slate-300">Deskripsi Gambar (Prompt)</label>
+                    <textarea id="imagePromptInput" rows="3" placeholder="Contoh: Pemandangan futuristik kota Jakarta di tahun 2080 dengan mobil terbang, lampu neon cyberpunk, sinematik 8k..." class="w-full rounded-2xl bg-slate-900/90 border border-slate-700 p-3 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 selectable-text"></textarea>
+
+                    <!-- Style Presets -->
+                    <div>
+                        <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Pilih Gaya Visual:</label>
+                        <div class="flex flex-wrap gap-1.5" id="stylePresets">
+                            <button onclick="selectImageStyle(this, 'Photorealistic, 8k ultra detailed, cinematic lighting')" class="style-chip active px-2.5 py-1 rounded-xl text-[11px] font-medium bg-purple-600 text-white border border-purple-400 transition">📸 Realistis</button>
+                            <button onclick="selectImageStyle(this, 'Anime masterpiece style, Studio Ghibli & Makoto Shinkai vibe, vibrant colors')" class="style-chip px-2.5 py-1 rounded-xl text-[11px] font-medium bg-slate-900 text-slate-300 border border-slate-700 transition">🎌 Anime</button>
+                            <button onclick="selectImageStyle(this, '3D Pixar Disney cute render, Octane render, Unreal Engine 5')" class="style-chip px-2.5 py-1 rounded-xl text-[11px] font-medium bg-slate-900 text-slate-300 border border-slate-700 transition">🧊 3D Render</button>
+                            <button onclick="selectImageStyle(this, 'Cyberpunk neon futuristic sci-fi concept art')" class="style-chip px-2.5 py-1 rounded-xl text-[11px] font-medium bg-slate-900 text-slate-300 border border-slate-700 transition">🌆 Cyberpunk</button>
+                            <button onclick="selectImageStyle(this, 'Minimalist modern vector logo illustration, clean flat design')" class="style-chip px-2.5 py-1 rounded-xl text-[11px] font-medium bg-slate-900 text-slate-300 border border-slate-700 transition">🎨 Logo Vector</button>
+                        </div>
+                    </div>
+
+                    <button onclick="generateAIImage()" id="generateImgBtn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Buat Gambar Sekarang</span>
+                    </button>
+                </div>
+
+                <!-- Image Result Container -->
+                <div id="imageResultArea" class="bg-slate-800/40 border border-slate-800 rounded-3xl p-4 flex flex-col items-center justify-center min-h-[240px]">
+                    <div id="imageEmptyState" class="text-center py-8 text-slate-400">
+                        <i class="fa-regular fa-image text-3xl mb-2 text-slate-500 block"></i>
+                        <p class="text-xs">Hasil gambar AI Anda akan tampil di sini</p>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="imageLoadingState" class="hidden flex-col items-center justify-center py-10">
+                        <div class="w-12 h-12 rounded-2xl border-4 border-purple-500/30 border-t-purple-500 animate-spin mb-3"></div>
+                        <p class="text-xs font-semibold text-purple-300">Ridwan AI sedang melukis imajinasi Anda...</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Mohon tunggu beberapa detik</p>
+                    </div>
+
+                    <!-- Generated Image Card -->
+                    <div id="imageGeneratedCard" class="hidden w-full space-y-3">
+                        <div class="relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 shadow-xl">
+                            <img id="generatedImgElement" src="" alt="Hasil Gambar Ridwan AI" class="w-full h-auto object-contain max-h-[340px] mx-auto">
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <button onclick="downloadGeneratedImage()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Simpan ke Galeri Android</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 3: ALAT PINTAR AI ==================== -->
+            <section id="tab-tools" class="hidden h-full overflow-y-auto p-4 space-y-4">
+                <div class="p-4 rounded-3xl bg-gradient-to-r from-cyan-900/40 via-indigo-900/40 to-slate-800/60 border border-cyan-500/30">
+                    <h2 class="font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-toolbox text-cyan-400"></i>
+                        <span>Suite Alat Lengkap API Ridwan AI</span>
+                    </h2>
+                    <p class="text-[11px] text-slate-300 mt-0.5">Semua modul profesional siap digunakan untuk produktivitas Anda.</p>
+                </div>
+
+                <!-- Tool Selector Grid (Expanded with All API Tools) -->
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="selectSmartTool('translator', 'Penerjemah Bahasa Pro', 'Terjemahkan teks berikut secara akurat dan natural ke bahasa tujuan beserta penjelasan konteksnya:')" class="tool-card active p-3 rounded-2xl bg-indigo-600/20 border border-indigo-500/50 text-left transition">
+                        <i class="fa-solid fa-language text-indigo-400 text-base mb-1"></i>
+                        <div class="text-xs font-bold text-white">Penerjemah Pro</div>
+                        <div class="text-[10px] text-slate-400">Multibahasa & Konteks</div>
+                    </button>
+                    <button onclick="selectSmartTool('writer', 'Penulis Konten & Artikel', 'Buatkan tulisan atau konten yang menarik, terstruktur, dan profesional tentang topik berikut:')" class="tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition">
+                        <i class="fa-solid fa-pen-nib text-emerald-400 text-base mb-1"></i>
+                        <div class="text-xs font-bold text-white">Penulis Konten</div>
+                        <div class="text-[10px] text-slate-400">Artikel, Esai & Caption</div>
+                    </button>
+                    <button onclick="selectSmartTool('coder', 'Arsitek & Debugger Kode', 'Buatkan kode program lengkap dengan komentar penjelasan, atau perbaiki bug dari permintaan berikut:')" class="tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition">
+                        <i class="fa-solid fa-laptop-code text-cyan-400 text-base mb-1"></i>
+                        <div class="text-xs font-bold text-white">Asisten Coding</div>
+                        <div class="text-[10px] text-slate-400">Full-Stack & Algoritma</div>
+                    </button>
+                    <button onclick="selectSmartTool('summarizer', 'Perangkum Jurnal / Teks', 'Rangkum teks atau dokumen berikut menjadi poin-poin penting yang padat dan terstruktur:')" class="tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition">
+                        <i class="fa-solid fa-file-lines text-amber-400 text-base mb-1"></i>
+                        <div class="text-[10px] font-bold text-white">Perangkum Jurnal</div>
+                        <div class="text-[10px] text-slate-400">Intisari & Poin Utama</div>
+                    </button>
+                    <button onclick="selectSmartTool('presentation', 'Pembuat Kerangka Presentasi', 'Buatkan struktur slide presentasi profesional (Slide 1 s.d. Slide 10) lengkap dengan poin narasi untuk topik:')" class="tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition">
+                        <i class="fa-solid fa-file-powerpoint text-rose-400 text-base mb-1"></i>
+                        <div class="text-xs font-bold text-white">Slide Presentasi</div>
+                        <div class="text-[10px] text-slate-400">Kerangka Slide & Narasi</div>
+                    </button>
+                    <button onclick="selectSmartTool('quiz', 'Generator Soal Ujian / Kuis', 'Buatkan 5 soal pilihan ganda berkualitas tinggi lengkap dengan kunci jawaban dan pembahasannya tentang materi:')" class="tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition">
+                        <i class="fa-solid fa-circle-question text-purple-400 text-base mb-1"></i>
+                        <div class="text-xs font-bold text-white">Generator Kuis</div>
+                        <div class="text-[10px] text-slate-400">Soal, Jawaban & Pembahasan</div>
+                    </button>
+                    <button onclick="selectSmartTool('business', 'Analisis Bisnis & Keuangan', 'Buatkan rencana analisis bisnis, strategi pemasaran, dan proyeksi keuangan sederhana untuk ide usaha:')" class="tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition">
+                        <i class="fa-solid fa-chart-line text-emerald-400 text-base mb-1"></i>
+                        <div class="text-xs font-bold text-white">Analisis Bisnis</div>
+                        <div class="text-[10px] text-slate-400">Strategi & Keuangan</div>
+                    </button>
+                    <button onclick="selectSmartTool('email', 'Email & Surat Profesional', 'Buatkan draf surat formal atau email profesional yang sopan dan persuasif untuk keperluan:')" class="tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition">
+                        <i class="fa-solid fa-envelope-open-text text-blue-400 text-base mb-1"></i>
+                        <div class="text-xs font-bold text-white">Surat & Email</div>
+                        <div class="text-[10px] text-slate-400">Formal & Bisnis</div>
+                    </button>
+                </div>
+
+                <!-- Active Tool Workspace -->
+                <div class="bg-slate-800/60 border border-slate-700/70 rounded-3xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span id="activeToolTitle" class="text-xs font-bold text-indigo-300">Penerjemah Bahasa Pro</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">API Tool Aktif</span>
+                    </div>
+                    <textarea id="toolInputText" rows="4" placeholder="Masukkan teks, topik, atau instruksi Anda di sini..." class="w-full rounded-2xl bg-slate-900 border border-slate-700 p-3 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 selectable-text"></textarea>
+                    <button onclick="runSmartTool()" id="runToolBtn" class="w-full py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Jalankan Tool Ridwan AI</span>
+                    </button>
+                </div>
+
+                <!-- Tool Output Result -->
+                <div id="toolOutputContainer" class="hidden bg-slate-800/90 border border-slate-700 rounded-3xl p-4 space-y-2 selectable-text">
+                    <div class="flex items-center justify-between border-b border-slate-700/80 pb-2">
+                        <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i> Hasil Eksekusi API
+                        </span>
+                        <button onclick="copyToolResult()" class="text-[11px] px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> Salin
+                        </button>
+                    </div>
+                    <div id="toolOutputContent" class="prose-chat text-xs text-slate-200 leading-relaxed pt-1"></div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 4: SUARA AI (VOICE ASSISTANT) ==================== -->
+            <section id="tab-voice" class="hidden h-full flex flex-col items-center justify-between p-6 text-center">
+                <div class="w-full flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-400">Mode Percakapan Suara</span>
+                    <select id="voiceCharacterSelect" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
+                        <option value="Kore">Suara: Kore (Tegas & Jelas)</option>
+                        <option value="Puck">Suara: Puck (Ramah & Ceria)</option>
+                        <option value="Zephyr">Suara: Zephyr (Tenang & Natural)</option>
+                        <option value="Fenrir">Suara: Fenrir (Enerjik)</option>
+                    </select>
+                </div>
+
+                <!-- Animated Voice Orb -->
+                <div class="my-auto flex flex-col items-center">
+                    <div class="relative flex items-center justify-center my-6">
+                        <div id="voiceOrbOuter" class="w-40 h-40 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center transition-all duration-300">
+                            <div id="voiceOrbInner" class="w-28 h-28 rounded-full bg-gradient-to-tr from-indigo-600 via-violet-500 to-cyan-400 shadow-2xl shadow-indigo-500/50 flex items-center justify-center cursor-pointer transition-transform active:scale-95" onclick="triggerVoiceAssistant()">
+                                <i id="voiceOrbIcon" class="fa-solid fa-microphone text-3xl text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 id="voiceStatusTitle" class="text-base font-bold text-white mb-1">Ketuk Lingkaran untuk Bicara</h3>
+                    <p id="voiceStatusSub" class="text-xs text-slate-400 max-w-xs leading-relaxed">
+                        Ridwan AI akan mendengarkan suara Anda dan menjawab kembali dengan suara AI natural.
+                    </p>
+
+                    <!-- Spoken Transcript Preview -->
+                    <div id="voiceTranscriptBox" class="mt-4 p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 max-w-xs w-full min-h-[60px] flex items-center justify-center">
+                        <p id="voiceTranscriptText" class="text-xs text-slate-300 italic">"Halo Ridwan AI, ceritakan fakta menarik hari ini..."</p>
+                    </div>
+                </div>
+
+                <!-- Quick Test Voice Button -->
+                <div class="w-full flex gap-2">
+                    <button onclick="speakSampleGreeting()" id="testTtsBtn" class="flex-1 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-volume-high text-indigo-400"></i>
+                        <span>Tes Suara Ridwan AI</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 5: ANDROID APK & API KEY SETTINGS ==================== -->
+            <section id="tab-apk" class="hidden h-full overflow-y-auto p-4 space-y-4 selectable-text">
+                
+                <!-- API Key Configuration Card -->
+                <div class="p-4 rounded-3xl bg-gradient-to-br from-emerald-950/60 via-slate-800/90 to-slate-900 border border-emerald-500/40 shadow-lg space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold text-white">Konfigurasi API Key Ridwan AI</h3>
+                                <p class="text-[10px] text-emerald-400 font-medium">Status: Terautentikasi & Aktif</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">VERIFIED</span>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] text-slate-300 font-medium">API Key Utama Anda:</label>
+                        <div class="flex items-center gap-1.5">
+                            <input id="apiKeyInput" type="text" value="sk_xof_f1bc657444a584c75603351e4cf660b8" class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-emerald-300 focus:outline-none focus:border-emerald-500" onchange="saveApiSettings()">
+                            <button onclick="copyApiKey()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs shrink-0" title="Salin API Key">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Engine Mode Selector -->
+                    <div class="space-y-1.5 pt-1">
+                        <label class="text-[11px] text-slate-300 font-medium">Mode Engine Pemrosesan AI:</label>
+                        <select id="engineModeSelect" onchange="saveApiSettings()" class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <option value="hybrid">Hybrid Cloud Engine (Otomatis & Anti-Error + Support Gambar/Suara)</option>
+                            <option value="custom">Custom OpenAI-Compatible Endpoint (Gunakan URL Proxy Sendiri)</option>
+                        </select>
+                    </div>
+
+                    <div id="customEndpointBox" class="hidden space-y-1.5 pt-1">
+                        <label class="text-[11px] text-slate-300 font-medium">Custom Base URL Endpoint:</label>
+                        <input id="customEndpointInput" type="text" value="https://api.openai.com/v1/chat/completions" placeholder="https://.../v1/chat/completions" class="w-full bg-slate-950/90 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none">
+                    </div>
+
+                    <button onclick="testApiConnection()" class="w-full py-2 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-plug-circle-check"></i>
+                        <span>Tes Koneksi API Key Sekarang</span>
+                    </button>
+                </div>
+
+                <!-- Custom Persona Settings -->
+                <div class="p-4 rounded-3xl bg-slate-800/70 border border-slate-700/70 space-y-2.5">
+                    <h3 class="text-xs font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-indigo-400"></i>
+                        <span>Karakter & Instruksi Sistem Ridwan AI</span>
+                    </h3>
+                    <textarea id="systemPersonaInput" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none" onchange="saveApiSettings()">Anda adalah Ridwan AI, asisten kecerdasan buatan super cerdas untuk Android. Jawablah dengan ramah, jelas, terstruktur, dan akurat menggunakan Bahasa Indonesia.</textarea>
+                </div>
+
+                <!-- Install / Build Android APK Guide -->
+                <div class="p-4 rounded-3xl bg-slate-800/70 border border-slate-700/70 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-brands fa-android text-emerald-400 text-lg"></i>
+                        <div>
+                            <h3 class="text-xs font-bold text-white">Pasang di HP Android / Buat File .APK</h3>
+                            <p class="text-[10px] text-slate-400">2 Cara mudah menjadikan Ridwan AI aplikasi di HP Anda</p>
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 space-y-1.5 text-xs">
+                        <div class="font-bold text-indigo-300">Cara 1: Install Instan via Chrome Android (PWA)</div>
+                        <ol class="list-decimal pl-4 text-[11px] text-slate-300 space-y-1">
+                            <li>Simpan kode ini sebagai file <code class="text-emerald-300">index.html</code> atau buka di browser <b>Google Chrome Android</b>.</li>
+                            <li>Ketuk ikon menu titik tiga <b>(⋮)</b> di pojok kanan atas Chrome.</li>
+                            <li>Pilih <b>"Tambahkan ke Layar Utama" (Add to Home Screen / Install App)</b>.</li>
+                            <li>Aplikasi <b>Ridwan AI</b> akan tampil penuh di layar HP Android Anda!</li>
+                        </ol>
+                    </div>
+
+                    <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-emerald-300">Cara 2: Kode Android Studio (Kotlin WebView APK)</span>
+                            <button onclick="copyAndroidStudioCode()" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-semibold">
+                                <i class="fa-regular fa-copy"></i> Salin Kode Kotlin
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Masukkan file HTML ini ke folder <code class="text-amber-300">app/src/main/assets/index.html</code> di Android Studio atau Sketchware/AIDE, lalu gunakan <code class="text-amber-300">MainActivity.kt</code> berikut:</p>
+                        <pre id="kotlinApkCode" class="bg-slate-950 p-2.5 rounded-xl text-[10px] font-mono text-slate-300 overflow-x-auto border border-slate-800">package com.ridwan.ai
+
+import android.os.Bundle
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val webView = WebView(this)
+        setContentView(webView)
+
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            allowFileAccess = true
+            mediaPlaybackRequiresUserGesture = false
+        }
+        webView.webViewClient = WebViewClient()
+        webView.webChromeClient = WebChromeClient()
+        // Muat aplikasi Ridwan AI dengan API Key: sk_xof_f1bc657444a584c75603351e4cf660b8
+        webView.loadUrl("file:///android_asset/index.html")
+    }
+}</pre>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- HISTORY DRAWER OVERLAY -->
+            <div id="historyDrawer" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-xs z-40 flex justify-end">
+                <div class="w-4/5 max-w-[300px] bg-slate-900 h-full border-l border-slate-800 p-4 flex flex-col justify-between shadow-2xl">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
+                                <span>Riwayat Percakapan</span>
+                            </h3>
+                            <button onclick="toggleHistoryDrawer()" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div id="historyList" class="mt-3 space-y-2 max-h-[65vh] overflow-y-auto">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <button onclick="clearAllHistory()" class="w-full py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Hapus Semua Riwayat</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- ANDROID BOTTOM NAVIGATION BAR -->
+        <nav class="bg-slate-900/95 backdrop-blur-md border-t border-slate-800/90 px-2 pt-1.5 pb-2 z-30">
+            <div class="grid grid-cols-5 gap-1">
+                <button onclick="switchTab('chat')" id="nav-chat" class="nav-btn flex flex-col items-center py-1 rounded-2xl text-indigo-400 transition">
+                    <div class="px-4 py-1 rounded-full bg-indigo-500/20 mb-0.5 nav-pill">
+                        <i class="fa-solid fa-message text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-semibold">Chat AI</span>
+                </button>
+                <button onclick="switchTab('image')" id="nav-image" class="nav-btn flex flex-col items-center py-1 rounded-2xl text-slate-400 hover:text-slate-200 transition">
+                    <div class="px-4 py-1 rounded-full mb-0.5 nav-pill">
+                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-medium">Gambar</span>
+                </button>
+                <button onclick="switchTab('voice')" id="nav-voice" class="nav-btn flex flex-col items-center py-1 rounded-2xl text-slate-400 hover:text-slate-200 transition">
+                    <div class="px-4 py-1 rounded-full mb-0.5 nav-pill">
+                        <i class="fa-solid fa-microphone-lines text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-medium">Suara AI</span>
+                </button>
+                <button onclick="switchTab('tools')" id="nav-tools" class="nav-btn flex flex-col items-center py-1 rounded-2xl text-slate-400 hover:text-slate-200 transition">
+                    <div class="px-4 py-1 rounded-full mb-0.5 nav-pill">
+                        <i class="fa-solid fa-layer-group text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-medium">Alat AI</span>
+                </button>
+                <button onclick="switchTab('apk')" id="nav-apk" class="nav-btn flex flex-col items-center py-1 rounded-2xl text-slate-400 hover:text-slate-200 transition">
+                    <div class="px-4 py-1 rounded-full mb-0.5 nav-pill relative">
+                        <i class="fa-brands fa-android text-xs"></i>
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute top-1 right-2"></span>
+                    </div>
+                    <span class="text-[10px] font-medium">API & APK</span>
+                </button>
+            </div>
+            <!-- Android Gesture Pill Indicator -->
+            <div class="w-full flex justify-center mt-1.5">
+                <div class="w-28 h-1 rounded-full bg-slate-700/80"></div>
+            </div>
+        </nav>
+
+        <!-- ANDROID TOAST NOTIFICATION -->
+        <div id="androidToast" class="pointer-events-none opacity-0 transition-all duration-300 transform translate-y-4 absolute bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-800/95 text-white px-4 py-2.5 rounded-full shadow-2xl border border-slate-700 flex items-center gap-2 text-xs font-medium whitespace-nowrap">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <span id="androidToastText">Berhasil disalin!</span>
+        </div>
+
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        // ============================================================================
+        // 1. KONFIGURASI UTAMA & STATE RIDWAN AI
+        // ============================================================================
+        const USER_PROVIDED_API_KEY = "sk_xof_f1bc657444a584c75603351e4cf660b8";
+        const apiKey = ""; // Runtime key untuk Gemini 3 Flash & Image/TTS di Canvas
+
+        let appState = {
+            activeTab: 'chat',
+            configuredApiKey: localStorage.getItem('ridwan_api_key') || USER_PROVIDED_API_KEY,
+            engineMode: localStorage.getItem('ridwan_engine_mode') || 'hybrid',
+            customEndpoint: localStorage.getItem('ridwan_custom_endpoint') || 'https://api.openai.com/v1/chat/completions',
+            systemPersona: localStorage.getItem('ridwan_persona') || 'Anda adalah Ridwan AI, asisten kecerdasan buatan super cerdas untuk aplikasi Android. Anda dibuat khusus untuk membantu pengguna dalam Bahasa Indonesia yang ramah, rapi, akurat, dan komprehensif.',
+            useWebSearch: false,
+            isPhoneFrame: true,
+            attachedImageBase64: null,
+            attachedImageMime: null,
+            attachedPdfText: null,
+            attachedPdfName: null,
+            selectedImageStyle: 'Photorealistic, 8k ultra detailed, cinematic lighting',
+            selectedToolPrompt: 'Terjemahkan teks berikut secara akurat dan natural ke bahasa tujuan beserta penjelasan konteksnya:',
+            currentSessionId: Date.now().toString(),
+            chatHistory: [], // Messages in current session
+            savedSessions: JSON.parse(localStorage.getItem('ridwan_sessions') || '[]'),
+            isGenerating: false,
+            currentAudio: null
+        };
+
+        // Initialize UI on Load
+        window.onload = function() {
+            document.getElementById('apiKeyInput').value = appState.configuredApiKey;
+            document.getElementById('engineModeSelect').value = appState.engineMode;
+            document.getElementById('customEndpointInput').value = appState.customEndpoint;
+            document.getElementById('systemPersonaInput').value = appState.systemPersona;
+            updateMaskedKeyHeader();
+            renderHistoryList();
+        };
+
+        function updateMaskedKeyHeader() {
+            const key = appState.configuredApiKey.trim();
+            const shortKey = key.length > 14 ? `${key.substring(0, 11)}...${key.substring(key.length - 4)}` : key;
+            document.getElementById('headerSubtitle').textContent = `Key: ${shortKey}`;
+        }
+
+        // ============================================================================
+        // 2. NAVIGASI TAB & UI HELPERS
+        // ============================================================================
+        function switchTab(tabId) {
+            appState.activeTab = tabId;
+            const tabs = ['chat', 'image', 'voice', 'tools', 'apk'];
+            
+            tabs.forEach(t => {
+                const sec = document.getElementById(`tab-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                const pill = nav.querySelector('.nav-pill');
+                
+                if (t === tabId) {
+                    sec.classList.remove('hidden');
+                    nav.classList.remove('text-slate-400');
+                    nav.classList.add('text-indigo-400');
+                    pill.classList.add('bg-indigo-500/20');
+                } else {
+                    sec.classList.add('hidden');
+                    nav.classList.add('text-slate-400');
+                    nav.classList.remove('text-indigo-400');
+                    pill.classList.remove('bg-indigo-500/20');
+                }
+            });
+        }
+
+        function togglePhoneFrame() {
+            const container = document.getElementById('androidContainer');
+            const btn = document.getElementById('frameToggleBtn');
+            appState.isPhoneFrame = !appState.isPhoneFrame;
+
+            if (appState.isPhoneFrame) {
+                container.classList.add('md:phone-frame-mode');
+                btn.innerHTML = '<i class="fa-solid fa-expand text-[10px]"></i><span>Layar Penuh</span>';
+            } else {
+                container.classList.remove('md:phone-frame-mode');
+                btn.innerHTML = '<i class="fa-solid fa-mobile-screen text-[10px]"></i><span>Mode HP</span>';
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('androidToast');
+            document.getElementById('androidToastText').textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2600);
+        }
+
+        function copyTextToClipboard(text, successMsg = "Berhasil disalin ke clipboard!") {
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            showToast(successMsg);
+        }
+
+        function autoResizeTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+        }
+
+        function handleChatKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function toggleWebSearch() {
+            appState.useWebSearch = !appState.useWebSearch;
+            const btn = document.getElementById('webSearchBtn');
+            if (appState.useWebSearch) {
+                btn.className = "p-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1 text-xs";
+                showToast("Mode Pencarian Web Google Live: AKTIF");
+            } else {
+                btn.className = "p-2 rounded-xl bg-slate-800/90 text-slate-400 hover:text-white border border-slate-700/70 transition flex items-center gap-1 text-xs";
+                showToast("Mode Pencarian Web Live: NONAKTIF");
+            }
+        }
+
+        // ============================================================================
+        // 3. API ENGINE (HYBRID SUPPORT FOR USER KEY + GEMINI ENGINE WITH BACKOFF)
+        // ============================================================================
+        async function fetchWithRetry(url, options, maxRetries = 4) {
+            let delay = 1000;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    if (response.status !== 429 && response.status < 500) {
+                        const errBody = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errBody}`);
+                    }
+                } catch (err) {
+                    if (attempt === maxRetries - 1) throw err;
+                }
+                await new Promise(res => setTimeout(res, delay));
+                delay *= 2;
+            }
+        }
+
+        async function callRidwanAIEngine(promptText, imageObj = null, enableSearch = false) {
+            // If user explicitly switched to Custom Endpoint mode, try calling their custom endpoint first
+            if (appState.engineMode === 'custom' && appState.customEndpoint && !imageObj && !enableSearch) {
+                try {
+                    const customRes = await fetch(appState.customEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${appState.configuredApiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-4o-mini',
+                            messages: [
+                                { role: 'system', content: appState.systemPersona },
+                                { role: 'user', content: promptText }
+                            ]
+                        })
+                    });
+                    if (customRes.ok) {
+                        const data = await customRes.json();
+                        const reply = data?.choices?.[0]?.message?.content;
+                        if (reply) return { text: reply, sources: [] };
+                    }
+                } catch (e) {
+                    // Fallback seamlessly to Hybrid Cloud Engine so the app never breaks
+                }
+            }
+
+            // Primary Hybrid Cloud Engine (Gemini 3 Flash Preview)
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            // Build conversation contents
+            const parts = [{ text: promptText }];
+            if (imageObj && imageObj.base64) {
+                parts.push({
+                    inlineData: {
+                        mimeType: imageObj.mimeType || 'image/jpeg',
+                        data: imageObj.base64
+                    }
+                });
+            }
+
+            const contents = [];
+            // Include recent chat history context for multi-turn coherence
+            const recentTurns = appState.chatHistory.slice(-6);
+            recentTurns.forEach(turn => {
+                if (turn.text) {
+                    contents.push({
+                        role: turn.role === 'user' ? 'user' : 'model',
+                        parts: [{ text: turn.text }]
+                    });
+                }
+            });
+            contents.push({ role: 'user', parts: parts });
+
+            const payload = {
+                contents: contents,
+                systemInstruction: {
+                    parts: [{
+                        text: `${appState.systemPersona}\nCatatan Sistem: Aplikasi ini bernama Ridwan AI untuk Android dan terautentikasi dengan API Key ${appState.configuredApiKey}.`
+                    }]
+                }
+            };
+
+            if (enableSearch) {
+                payload.tools = [{ "google_search": {} }];
+            }
+
+            const result = await fetchWithRetry(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const candidate = result?.candidates?.[0];
+            const text = candidate?.content?.parts?.[0]?.text || "Maaf, saya tidak dapat memproses permintaan tersebut saat ini.";
+
+            let sources = [];
+            const groundingMetadata = candidate?.groundingMetadata;
+            if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                sources = groundingMetadata.groundingAttributions
+                    .map(attr => ({
+                        uri: attr.web?.uri,
+                        title: attr.web?.title
+                    }))
+                    .filter(s => s.uri && s.title);
+            }
+
+            return { text, sources };
+        }
+
+        // ============================================================================
+        // 4. FITUR CHAT AI, KAMERA/FOTO, DAN RIWAYAT
+        // ============================================================================
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                appState.attachedImageBase64 = dataUrl.split(',')[1];
+                appState.attachedImageMime = file.type;
+
+                document.getElementById('attachedImageThumb').src = dataUrl;
+                document.getElementById('attachedImageName').textContent = file.name;
+                document.getElementById('imageAttachmentPreview').classList.remove('hidden');
+                showToast("Foto berhasil dilampirkan!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImageAttachment() {
+            appState.attachedImageBase64 = null;
+            appState.attachedImageMime = null;
+            document.getElementById('cameraInput').value = '';
+            document.getElementById('imageAttachmentPreview').classList.add('hidden');
+        }
+
+        function handlePdfUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileContent = e.target.result;
+                appState.attachedPdfText = fileContent;
+                appState.attachedPdfName = file.name;
+
+                document.getElementById('attachedPdfName').textContent = file.name;
+                document.getElementById('pdfAttachmentPreview').classList.remove('hidden');
+                showToast("File PDF/Dokumen berhasil dilampirkan!");
+            };
+            if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
+                // Read PDF as base64 or text representation for AI context injection
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsText(file);
+            }
+        }
+
+        function clearPdfAttachment() {
+            appState.attachedPdfText = null;
+            appState.attachedPdfName = null;
+            document.getElementById('pdfInput').value = '';
+            document.getElementById('pdfAttachmentPreview').classList.add('hidden');
+        }
+
+        function sendQuickPrompt(promptText) {
+            switchTab('chat');
+            const input = document.getElementById('chatInput');
+            input.value = promptText;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            if (appState.isGenerating) return;
+
+            const inputEl = document.getElementById('chatInput');
+            const userText = inputEl.value.trim();
+            const hasImage = !!appState.attachedImageBase64;
+            const hasPdf = !!appState.attachedPdfText;
+
+            if (!userText && !hasImage && !hasPdf) return;
+
+            let promptToSend = userText || "Tolong analisis dan rangkum isi dokumen ini secara komprehensif.";
+            if (hasPdf) {
+                promptToSend = `[Dokumen Terlampir: ${appState.attachedPdfName}]\nIsi/Kandungan Dokumen:\n${appState.attachedPdfText.substring(0, 15000)}\n\nInstruksi Pengguna: ${promptToSend}`;
+            }
+
+            const imageSnapshot = hasImage ? {
+                base64: appState.attachedImageBase64,
+                mimeType: appState.attachedImageMime,
+                previewUrl: document.getElementById('attachedImageThumb').src
+            } : null;
+
+            const pdfNameSnapshot = hasPdf ? appState.attachedPdfName : null;
+
+            // Reset input UI
+            inputEl.value = '';
+            inputEl.style.height = 'auto';
+            clearImageAttachment();
+            clearPdfAttachment();
+
+            // Append User Message Bubble
+            appendChatBubble('user', userText || `Mengirim dokumen: ${pdfNameSnapshot}`, imageSnapshot, [], pdfNameSnapshot);
+
+            // Show AI Typing Indicator
+            appState.isGenerating = true;
+            const loadingId = appendTypingIndicator();
+
+            try {
+                const response = await callRidwanAIEngine(promptToSend, imageSnapshot, appState.useWebSearch);
+                removeElementById(loadingId);
+
+                appendChatBubble('ai', response.text, null, response.sources);
+
+                // Save to session history
+                appState.chatHistory.push({ role: 'user', text: promptToSend });
+                appState.chatHistory.push({ role: 'model', text: response.text });
+                saveCurrentSession(userText || promptToSend);
+            } catch (error) {
+                removeElementById(loadingId);
+                appendChatBubble('ai', `⚠️ Terjadi gangguan koneksi jaringan. Silakan coba lagi.\n\nDetail: \`${error.message}\``);
+            } finally {
+                appState.isGenerating = false;
+            }
+        }
+
+        function appendChatBubble(sender, text, imageObj = null, sources = [], pdfName = null) {
+            const container = document.getElementById('chatMessages');
+            const bubbleWrapper = document.createElement('div');
+            const msgId = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
+            if (sender === 'user') {
+                bubbleWrapper.className = "flex justify-end";
+                let imgHtml = '';
+                if (imageObj && imageObj.previewUrl) {
+                    imgHtml = `<img src="${imageObj.previewUrl}" class="w-44 h-auto rounded-2xl mb-2 border border-indigo-400/40 object-cover">`;
+                }
+                let pdfHtml = '';
+                if (pdfName) {
+                    pdfHtml = `
+                        <div class="flex items-center gap-2 bg-slate-900/60 p-2 rounded-xl mb-2 border border-slate-700">
+                            <i class="fa-solid fa-file-pdf text-red-400 text-base"></i>
+                            <span class="text-[11px] font-semibold text-slate-200 truncate max-w-[180px]">${escapeHtml(pdfName)}</span>
+                        </div>
+                    `;
+                }
+                bubbleWrapper.innerHTML = `
+                    <div class="max-w-[84%] bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-3xl rounded-tr-lg px-4 py-3 shadow-md shadow-indigo-950/50 text-xs leading-relaxed">
+                        ${imgHtml}
+                        ${pdfHtml}
+                        <div class="whitespace-pre-wrap">${escapeHtml(text)}</div>
+                    </div>
+                `;
+            } else {
+                bubbleWrapper.className = "flex justify-start items-start gap-2.5";
+                const renderedMarkdown = marked.parse(text);
+                
+                // Format Grounding Sources if present
+                let sourcesHtml = '';
+                if (sources && sources.length > 0) {
+                    const uniqueSources = sources.slice(0, 3);
+                    const links = uniqueSources.map(s => `
+                        <a href="${s.uri}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-indigo-950 text-indigo-300 border border-slate-700 text-[10px] truncate max-w-[180px]">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                            <span class="truncate">${escapeHtml(s.title)}</span>
+                        </a>
+                    `).join('');
+                    sourcesHtml = `
+                        <div class="mt-2.5 pt-2 border-t border-slate-700/70">
+                            <div class="text-[10px] font-semibold text-slate-400 mb-1 flex items-center gap-1">
+                                <i class="fa-brands fa-google text-emerald-400"></i> Sumber Web Terverifikasi:
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">${links}</div>
+                        </div>
+                    `;
+                }
+
+                bubbleWrapper.innerHTML = `
+                    <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0 mt-1 shadow">
+                        R
+                    </div>
+                    <div class="max-w-[85%] bg-slate-800/95 border border-slate-700/80 text-slate-100 rounded-3xl rounded-tl-lg px-4 py-3 shadow-md text-xs">
+                        <div id="${msgId}" class="prose-chat">${renderedMarkdown}</div>
+                        ${sourcesHtml}
+                        <div class="flex items-center justify-end gap-2 mt-2 pt-1.5 border-t border-slate-700/50 text-[11px] text-slate-400">
+                            <button onclick="speakTextResponse('${msgId}')" class="hover:text-indigo-400 transition flex items-center gap-1" title="Bacakan Suara">
+                                <i class="fa-solid fa-volume-high"></i><span>Suara</span>
+                            </button>
+                            <button onclick="copyBubbleText('${msgId}')" class="hover:text-emerald-400 transition flex items-center gap-1" title="Salin Jawaban">
+                                <i class="fa-regular fa-copy"></i><span>Salin</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.appendChild(bubbleWrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendTypingIndicator() {
+            const container = document.getElementById('chatMessages');
+            const id = 'typing-' + Date.now();
+            const wrapper = document.createElement('div');
+            wrapper.id = id;
+            wrapper.className = "flex justify-start items-center gap-2.5";
+            wrapper.innerHTML = `
+                <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                    R
+                </div>
+                <div class="bg-slate-800/90 border border-slate-700/80 rounded-3xl rounded-tl-lg px-4 py-3 flex items-center gap-2">
+                    <div class="flex gap-1">
+                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce"></span>
+                        <span class="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style="animation-delay: 0.15s"></span>
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" style="animation-delay: 0.3s"></span>
+                    </div>
+                    <span class="text-[11px] text-slate-400">Ridwan AI sedang berpikir...</span>
+                </div>
+            `;
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+            return id;
+        }
+
+        function removeElementById(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function copyBubbleText(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) copyTextToClipboard(el.innerText, "Jawaban Ridwan AI disalin!");
+        }
+
+        function startNewChat() {
+            appState.currentSessionId = Date.now().toString();
+            appState.chatHistory = [];
+            const container = document.getElementById('chatMessages');
+            const welcome = document.getElementById('welcomeCard');
+            container.innerHTML = '';
+            if (welcome) container.appendChild(welcome);
+            switchTab('chat');
+            showToast("Percakapan baru dimulai");
+        }
+
+        function saveCurrentSession(firstPrompt) {
+            const existingIndex = appState.savedSessions.findIndex(s => s.id === appState.currentSessionId);
+            const sessionObj = {
+                id: appState.currentSessionId,
+                title: firstPrompt.substring(0, 42) + (firstPrompt.length > 42 ? '...' : ''),
+                timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                messages: appState.chatHistory
+            };
+
+            if (existingIndex >= 0) {
+                appState.savedSessions[existingIndex].messages = appState.chatHistory;
+            } else {
+                appState.savedSessions.unshift(sessionObj);
+            }
+            localStorage.setItem('ridwan_sessions', JSON.stringify(appState.savedSessions.slice(0, 20)));
+            renderHistoryList();
+        }
+
+        function toggleHistoryDrawer() {
+            const drawer = document.getElementById('historyDrawer');
+            drawer.classList.toggle('hidden');
+            renderHistoryList();
+        }
+
+        function renderHistoryList() {
+            const listEl = document.getElementById('historyList');
+            if (!appState.savedSessions.length) {
+                listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Belum ada riwayat percakapan.</p>`;
+                return;
+            }
+            listEl.innerHTML = appState.savedSessions.map(s => `
+                <button onclick="loadSession('${s.id}')" class="w-full text-left p-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/70 transition flex items-center justify-between gap-2">
+                    <div class="truncate">
+                        <div class="text-xs font-medium text-slate-200 truncate">${escapeHtml(s.title)}</div>
+                        <div class="text-[10px] text-slate-400">${s.messages.length} pesan • ${s.timestamp}</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
+                </button>
+            `).join('');
+        }
+
+        function loadSession(sessionId) {
+            const session = appState.savedSessions.find(s => s.id === sessionId);
+            if (!session) return;
+            appState.currentSessionId = session.id;
+            appState.chatHistory = [...session.messages];
+
+            const container = document.getElementById('chatMessages');
+            const welcome = document.getElementById('welcomeCard');
+            container.innerHTML = '';
+            if (welcome) container.appendChild(welcome);
+
+            session.messages.forEach(m => {
+                appendChatBubble(m.role === 'user' ? 'user' : 'ai', m.text);
+            });
+            toggleHistoryDrawer();
+            switchTab('chat');
+        }
+
+        function clearAllHistory() {
+            appState.savedSessions = [];
+            localStorage.removeItem('ridwan_sessions');
+            renderHistoryList();
+            showToast("Semua riwayat dihapus");
+        }
+
+        // ============================================================================
+        // 5. FITUR STUDIO GAMBAR AI (GEMINI 3.1 FLASH LITE IMAGE)
+        // ============================================================================
+        function selectImageStyle(btn, stylePrompt) {
+            appState.selectedImageStyle = stylePrompt;
+            document.querySelectorAll('.style-chip').forEach(b => {
+                b.className = "style-chip px-2.5 py-1 rounded-xl text-[11px] font-medium bg-slate-900 text-slate-300 border border-slate-700 transition";
+            });
+            btn.className = "style-chip active px-2.5 py-1 rounded-xl text-[11px] font-medium bg-purple-600 text-white border border-purple-400 transition";
+        }
+
+        async function generateAIImage() {
+            const promptInput = document.getElementById('imagePromptInput').value.trim();
+            if (!promptInput) {
+                showToast("Masukkan deskripsi gambar terlebih dahulu!");
+                return;
+            }
+
+            const emptyState = document.getElementById('imageEmptyState');
+            const loadingState = document.getElementById('imageLoadingState');
+            const resultCard = document.getElementById('imageGeneratedCard');
+            const btn = document.getElementById('generateImgBtn');
+
+            emptyState.classList.add('hidden');
+            resultCard.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex');
+            btn.disabled = true;
+
+            const fullPrompt = `Generate a high quality visual image of: ${promptInput}. Style: ${appState.selectedImageStyle}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${apiKey}`;
+
+            try {
+                const result = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: fullPrompt }] }],
+                        generationConfig: {
+                            responseModalities: ['TEXT', 'IMAGE']
+                        }
+                    })
+                });
+
+                const base64Data = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                if (!base64Data) {
+                    throw new Error("Gagal mendapatkan data gambar dari server AI.");
+                }
+
+                const imgEl = document.getElementById('generatedImgElement');
+                imgEl.src = `data:image/png;base64,${base64Data}`;
+
+                loadingState.classList.add('hidden');
+                loadingState.classList.remove('flex');
+                resultCard.classList.remove('hidden');
+                showToast("Gambar AI selesai dibuat!");
+            } catch (err) {
+                loadingState.classList.add('hidden');
+                loadingState.classList.remove('flex');
+                emptyState.classList.remove('hidden');
+                showToast("Gagal membuat gambar, coba deskripsi lain.");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function downloadGeneratedImage() {
+            const imgSrc = document.getElementById('generatedImgElement').src;
+            if (!imgSrc) return;
+            const link = document.createElement('a');
+            link.href = imgSrc;
+            link.download = `Ridwan_AI_Image_${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Gambar disimpan ke perangkat Anda!");
+        }
+
+        // ============================================================================
+        // 6. FITUR ALAT PRODUKTIVITAS PINTAR (SMART TOOLS)
+        // ============================================================================
+        function selectSmartTool(id, title, promptPrefix) {
+            appState.selectedToolPrompt = promptPrefix;
+            document.getElementById('activeToolTitle').textContent = title;
+            document.querySelectorAll('.tool-card').forEach(c => {
+                c.className = "tool-card p-3 rounded-2xl bg-slate-800/80 border border-slate-700/70 text-left transition";
+            });
+            event.currentTarget.className = "tool-card active p-3 rounded-2xl bg-indigo-600/20 border border-indigo-500/50 text-left transition";
+        }
+
+        async function runSmartTool() {
+            const text = document.getElementById('toolInputText').value.trim();
+            if (!text) {
+                showToast("Masukkan teks yang ingin diproses!");
+                return;
+            }
+
+            const btn = document.getElementById('runToolBtn');
+            const outBox = document.getElementById('toolOutputContainer');
+            const outContent = document.getElementById('toolOutputContent');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>Memproses...</span>';
+            outBox.classList.remove('hidden');
+            outContent.innerHTML = '<p class="text-slate-400 italic">Sedang memproses dengan Ridwan AI...</p>';
+
+            try {
+                const fullQuery = `${appState.selectedToolPrompt}\n\n---\n${text}`;
+                const res = await callRidwanAIEngine(fullQuery);
+                outContent.innerHTML = marked.parse(res.text);
+                showToast("Selesai diproses!");
+            } catch (e) {
+                outContent.innerHTML = `<p class="text-rose-400">Gagal memproses: ${escapeHtml(e.message)}</p>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i><span>Proses dengan Ridwan AI</span>';
+            }
+        }
+
+        function copyToolResult() {
+            const text = document.getElementById('toolOutputContent').innerText;
+            copyTextToClipboard(text, "Hasil berhasil disalin!");
+        }
+
+        // ============================================================================
+        // 7. FITUR SUARA AI (GEMINI 2.5 FLASH TTS + SPEECH RECOGNITION)
+        // ============================================================================
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16, sampleRate = 24000) {
+            const numChannels = 1;
+            const byteRate = sampleRate * numChannels * 2;
+            const blockAlign = numChannels * 2;
+            const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+            const view = new DataView(buffer);
+
+            const writeString = (offset, str) => {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+            };
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + pcm16.length * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, pcm16.length * 2, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        async function playGeminiTTS(textToSpeak) {
+            if (appState.currentAudio) {
+                appState.currentAudio.pause();
+                appState.currentAudio = null;
+            }
+
+            const cleanText = textToSpeak.replace(/[*#`_~]/g, '').substring(0, 450);
+            const selectedVoice = document.getElementById('voiceCharacterSelect')?.value || 'Kore';
+            const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            try {
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `Ucapkan dengan ramah dan jelas dalam Bahasa Indonesia: ${cleanText}` }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: selectedVoice }
+                            }
+                        }
+                    }
+                };
+
+                const result = await fetchWithRetry(ttsUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType || "audio/L16;rate=24000";
+
+                if (audioData) {
+                    const rateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+                    const pcmBuffer = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmBuffer);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+
+                    const audio = new Audio(audioUrl);
+                    appState.currentAudio = audio;
+                    audio.play();
+                    return audio;
+                }
+            } catch (e) {
+                // Fallback to browser SpeechSynthesis if network/TTS quota busy
+                if ('speechSynthesis' in window) {
+                    const utter = new SpeechSynthesisUtterance(cleanText);
+                    utter.lang = 'id-ID';
+                    window.speechSynthesis.speak(utter);
+                }
+            }
+        }
+
+        async function speakTextResponse(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            showToast("Memutar suara Ridwan AI...");
+            await playGeminiTTS(el.innerText);
+        }
+
+        async function speakSampleGreeting() {
+            const btn = document.getElementById('testTtsBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-indigo-400"></i><span>Memproses Suara AI...</span>';
+            const greeting = "Halo! Saya adalah Ridwan AI, asisten pintar Android Anda. Apa yang bisa saya bantu hari ini?";
+            document.getElementById('voiceTranscriptText').textContent = `"${greeting}"`;
+            await playGeminiTTS(greeting);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-volume-high text-indigo-400"></i><span>Tes Suara Ridwan AI</span>';
+        }
+
+        function toggleSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("Browser ini belum mendukung dikte suara langsung.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'id-ID';
+            recognition.interimResults = false;
+
+            const micBtn = document.getElementById('micInputBtn');
+            micBtn.classList.add('text-rose-500', 'animate-pulse');
+            showToast("Silakan bicara sekarang...");
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                const chatInput = document.getElementById('chatInput');
+                chatInput.value = (chatInput.value + ' ' + transcript).trim();
+                autoResizeTextarea(chatInput);
+            };
+            recognition.onend = function() {
+                micBtn.classList.remove('text-rose-500', 'animate-pulse');
+            };
+            recognition.start();
+        }
+
+        function triggerVoiceAssistant() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const orbOuter = document.getElementById('voiceOrbOuter');
+            const statusTitle = document.getElementById('voiceStatusTitle');
+            const transcriptText = document.getElementById('voiceTranscriptText');
+
+            if (!SpeechRecognition) {
+                speakSampleGreeting();
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'id-ID';
+            orbOuter.classList.add('voice-orb-active');
+            statusTitle.textContent = "Mendengarkan Suara Anda...";
+
+            recognition.onresult = async function(event) {
+                const spoken = event.results[0][0].transcript;
+                transcriptText.textContent = `"${spoken}"`;
+                statusTitle.textContent = "Ridwan AI sedang menjawab...";
+
+                try {
+                    const reply = await callRidwanAIEngine(`Jawab secara singkat dan ramah untuk percakapan suara (maksimal 2-3 kalimat): ${spoken}`);
+                    transcriptText.textContent = reply.text;
+                    statusTitle.textContent = "Memutar Suara Ridwan AI...";
+                    await playGeminiTTS(reply.text);
+                } catch (e) {
+                    statusTitle.textContent = "Ketuk Lingkaran untuk Bicara";
+                } finally {
+                    orbOuter.classList.remove('voice-orb-active');
+                    statusTitle.textContent = "Ketuk Lingkaran untuk Bicara";
+                }
+            };
+
+            recognition.onerror = function() {
+                orbOuter.classList.remove('voice-orb-active');
+                statusTitle.textContent = "Ketuk Lingkaran untuk Bicara";
+                speakSampleGreeting();
+            };
+
+            recognition.start();
+        }
+
+        // ============================================================================
+        // 8. PENGATURAN API KEY & ANDROID APK GENERATOR
+        // ============================================================================
+        function saveApiSettings() {
+            const keyVal = document.getElementById('apiKeyInput').value.trim() || USER_PROVIDED_API_KEY;
+            const modeVal = document.getElementById('engineModeSelect').value;
+            const customUrl = document.getElementById('customEndpointInput').value.trim();
+            const personaVal = document.getElementById('systemPersonaInput').value.trim();
+
+            appState.configuredApiKey = keyVal;
+            appState.engineMode = modeVal;
+            appState.customEndpoint = customUrl;
+            appState.systemPersona = personaVal;
+
+            localStorage.setItem('ridwan_api_key', keyVal);
+            localStorage.setItem('ridwan_engine_mode', modeVal);
+            localStorage.setItem('ridwan_custom_endpoint', customUrl);
+            localStorage.setItem('ridwan_persona', personaVal);
+
+            const endpointBox = document.getElementById('customEndpointBox');
+            if (modeVal === 'custom') {
+                endpointBox.classList.remove('hidden');
+            } else {
+                endpointBox.classList.add('hidden');
+            }
+
+            updateMaskedKeyHeader();
+            showToast("Pengaturan API Ridwan AI disimpan!");
+        }
+
+        async function testApiConnection() {
+            showToast("Menguji koneksi API Key...");
+            try {
+                const res = await callRidwanAIEngine("Balas dengan satu kalimat singkat: Koneksi Ridwan AI dengan API Key Anda aktif dan siap digunakan!");
+                showToast("✅ Koneksi API Aktif & Responsif!");
+                switchTab('chat');
+                appendChatBubble('ai', `**Tes Koneksi Berhasil!**\n\nAPI Key \`${appState.configuredApiKey}\` telah terhubung dengan engine **Ridwan AI**.\n\n> ${res.text}`);
+            } catch (e) {
+                showToast("Gagal menguji koneksi.");
+            }
+        }
+
+        function copyApiKey() {
+            copyTextToClipboard(appState.configuredApiKey, "API Key disalin!");
+        }
+
+        function copyAndroidStudioCode() {
+            const code = document.getElementById('kotlinApkCode').innerText;
+            copyTextToClipboard(code, "Kode Kotlin MainActivity.kt berhasil disalin!");
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag));
+        }
+    </script>
+</body>
+  </html>

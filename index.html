@@ -187,7 +187,7 @@
     <!-- MAIN ANDROID APP CONTAINER -->
     <div id="androidContainer" class="w-full h-full md:phone-frame-mode bg-slate-900 flex flex-col justify-between relative z-10 overflow-hidden transition-all duration-300">
 
-        <!-- APP HEADER BAR -->
+        <!-- APP HEADER BAR (Clean, without clock/battery info bar) -->
         <header class="px-4 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 flex items-center justify-between z-20">
             <div class="flex items-center gap-3">
                 <!-- App Icon SVG -->
@@ -204,7 +204,7 @@
                     </div>
                     <p class="text-[11px] text-slate-400 flex items-center gap-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <span id="headerSubtitle">Key: sk_xof_f1bc...60b8</span>
+                        <span id="headerSubtitle">API Key Terhubung</span>
                     </p>
                 </div>
             </div>
@@ -246,7 +246,7 @@
                         </div>
                         <h2 class="text-lg font-bold text-white mb-1">Halo! Saya Ridwan AI 👋</h2>
                         <p class="text-xs text-slate-300 leading-relaxed mb-4">
-                            Asisten AI pintar Anda di Android. Saya siap membantu menjawab pertanyaan, membuat program, menganalisis foto, membuat gambar AI, hingga pencarian web real-time.
+                            Asisten AI pintar Anda di Android. Saya siap membantu menjawab pertanyaan, membuat program, menganalisis foto, membaca dokumen PDF, membuat gambar AI, hingga pencarian web real-time.
                         </p>
 
                         <!-- Quick Action Chips -->
@@ -724,7 +724,6 @@ class MainActivity : AppCompatActivity() {
         // 1. KONFIGURASI UTAMA & STATE RIDWAN AI
         // ============================================================================
         const USER_PROVIDED_API_KEY = "sk_xof_f1bc657444a584c75603351e4cf660b8";
-        const apiKey = ""; // Runtime key untuk Gemini 3 Flash & Image/TTS di Canvas
 
         let appState = {
             activeTab: 'chat',
@@ -758,9 +757,7 @@ class MainActivity : AppCompatActivity() {
         };
 
         function updateMaskedKeyHeader() {
-            const key = appState.configuredApiKey.trim();
-            const shortKey = key.length > 14 ? `${key.substring(0, 11)}...${key.substring(key.length - 4)}` : key;
-            document.getElementById('headerSubtitle').textContent = `Key: ${shortKey}`;
+            document.getElementById('headerSubtitle').textContent = `API Key Terhubung`;
         }
 
         // ============================================================================
@@ -849,7 +846,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // ============================================================================
-        // 3. API ENGINE (HYBRID SUPPORT FOR USER KEY + GEMINI ENGINE WITH BACKOFF)
+        // 3. API ENGINE (ROBUST RUNTIME KEY FOR CANVAS & BACKOFF)
         // ============================================================================
         async function fetchWithRetry(url, options, maxRetries = 4) {
             let delay = 1000;
@@ -872,7 +869,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         async function callRidwanAIEngine(promptText, imageObj = null, enableSearch = false) {
-            // If user explicitly switched to Custom Endpoint mode, try calling their custom endpoint first
             if (appState.engineMode === 'custom' && appState.customEndpoint && !imageObj && !enableSearch) {
                 try {
                     const customRes = await fetch(appState.customEndpoint, {
@@ -895,14 +891,14 @@ class MainActivity : AppCompatActivity() {
                         if (reply) return { text: reply, sources: [] };
                     }
                 } catch (e) {
-                    // Fallback seamlessly to Hybrid Cloud Engine so the app never breaks
+                    // Fallback to Canvas managed Gemini API endpoint
                 }
             }
 
-            // Primary Hybrid Cloud Engine (Gemini 3 Flash Preview)
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            // Correct Gemini API endpoint using runtime key injected by environment
+            const runtimeApiKey = typeof apiKey !== 'undefined' ? apiKey : '';
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${runtimeApiKey}`;
 
-            // Build conversation contents
             const parts = [{ text: promptText }];
             if (imageObj && imageObj.base64) {
                 parts.push({
@@ -914,7 +910,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             const contents = [];
-            // Include recent chat history context for multi-turn coherence
             const recentTurns = appState.chatHistory.slice(-6);
             recentTurns.forEach(turn => {
                 if (turn.text) {
@@ -1005,7 +1000,6 @@ class MainActivity : AppCompatActivity() {
                 showToast("File PDF/Dokumen berhasil dilampirkan!");
             };
             if (file.type === "application/pdf" || file.name.endsWith('.pdf')) {
-                // Read PDF as base64 or text representation for AI context injection
                 reader.readAsDataURL(file);
             } else {
                 reader.readAsText(file);
@@ -1049,16 +1043,13 @@ class MainActivity : AppCompatActivity() {
 
             const pdfNameSnapshot = hasPdf ? appState.attachedPdfName : null;
 
-            // Reset input UI
             inputEl.value = '';
             inputEl.style.height = 'auto';
             clearImageAttachment();
             clearPdfAttachment();
 
-            // Append User Message Bubble
             appendChatBubble('user', userText || `Mengirim dokumen: ${pdfNameSnapshot}`, imageSnapshot, [], pdfNameSnapshot);
 
-            // Show AI Typing Indicator
             appState.isGenerating = true;
             const loadingId = appendTypingIndicator();
 
@@ -1068,7 +1059,6 @@ class MainActivity : AppCompatActivity() {
 
                 appendChatBubble('ai', response.text, null, response.sources);
 
-                // Save to session history
                 appState.chatHistory.push({ role: 'user', text: promptToSend });
                 appState.chatHistory.push({ role: 'model', text: response.text });
                 saveCurrentSession(userText || promptToSend);
@@ -1111,7 +1101,6 @@ class MainActivity : AppCompatActivity() {
                 bubbleWrapper.className = "flex justify-start items-start gap-2.5";
                 const renderedMarkdown = marked.parse(text);
                 
-                // Format Grounding Sources if present
                 let sourcesHtml = '';
                 if (sources && sources.length > 0) {
                     const uniqueSources = sources.slice(0, 3);
@@ -1266,7 +1255,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // ============================================================================
-        // 5. FITUR STUDIO GAMBAR AI (GEMINI 3.1 FLASH LITE IMAGE)
+        // 5. FITUR STUDIO GAMBAR AI
         // ============================================================================
         function selectImageStyle(btn, stylePrompt) {
             appState.selectedImageStyle = stylePrompt;
@@ -1295,7 +1284,8 @@ class MainActivity : AppCompatActivity() {
             btn.disabled = true;
 
             const fullPrompt = `Generate a high quality visual image of: ${promptInput}. Style: ${appState.selectedImageStyle}`;
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${apiKey}`;
+            const runtimeApiKey = typeof apiKey !== 'undefined' ? apiKey : '';
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${runtimeApiKey}`;
 
             try {
                 const result = await fetchWithRetry(apiUrl, {
@@ -1390,7 +1380,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // ============================================================================
-        // 7. FITUR SUARA AI (GEMINI 2.5 FLASH TTS + SPEECH RECOGNITION)
+        // 7. FITUR SUARA AI (GEMINI TTS & SPEECH RECOGNITION)
         // ============================================================================
         function base64ToArrayBuffer(base64) {
             const binaryString = window.atob(base64);
@@ -1445,7 +1435,8 @@ class MainActivity : AppCompatActivity() {
 
             const cleanText = textToSpeak.replace(/[*#`_~]/g, '').substring(0, 450);
             const selectedVoice = document.getElementById('voiceCharacterSelect')?.value || 'Kore';
-            const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            const runtimeApiKey = typeof apiKey !== 'undefined' ? apiKey : '';
+            const ttsUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${runtimeApiKey}`;
 
             try {
                 const payload = {
@@ -1486,7 +1477,6 @@ class MainActivity : AppCompatActivity() {
                     return audio;
                 }
             } catch (e) {
-                // Fallback to browser SpeechSynthesis if network/TTS quota busy
                 if ('speechSynthesis' in window) {
                     const utter = new SpeechSynthesisUtterance(cleanText);
                     utter.lang = 'id-ID';
@@ -1644,4 +1634,4 @@ class MainActivity : AppCompatActivity() {
         }
     </script>
 </body>
-  </html>
+                        </html>
